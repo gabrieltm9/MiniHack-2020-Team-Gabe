@@ -30,6 +30,13 @@ public class GameController : MonoBehaviour
     public GameObject paintingUI;
     public GameObject paintingStuff;
 
+    public Vector3 paintingFlushPos;
+    public Vector3 paintingDrawingPos;
+
+    public GameObject EToAccess;
+    public bool canPaint;
+    public bool inPaintRange;
+
     private void Awake()
     {
         if (player == null)
@@ -51,10 +58,13 @@ public class GameController : MonoBehaviour
             EnableMessageUI();
         if (Input.GetKeyDown(KeyCode.Escape) && messageUI.activeSelf)
             DisableMessageUI();
-        if (Input.GetKeyDown(KeyCode.P))
-            EnablePainting();
         if (Input.GetKeyDown(KeyCode.Escape) && paintingUI.activeSelf)
             DisablePainting();
+        if(Input.GetKeyDown(KeyCode.E) && canPaint)
+        {
+            canPaint = false;
+            EnablePainting();
+        }
     }
 
     void EnableMessageUI()
@@ -216,14 +226,19 @@ public class GameController : MonoBehaviour
     {
         EncondeSpritePNG(painting.sprite);
         UploadPainting();
+        DisablePainting();
     }
 
     void EnablePainting()
     {
-        paintingUI.SetActive(true);
-        paintingStuff.SetActive(true);
         player.transform.GetChild(0).gameObject.SetActive(false);
         DisablePlayerStuff();
+        paintingUI.SetActive(true);
+        paintingStuff.SetActive(true);
+        painting.transform.localPosition = paintingDrawingPos;
+        painting.transform.eulerAngles = new Vector3(0, 0, 90);
+        painting.gameObject.SetActive(true);
+        EToAccess.SetActive(false);
     }
 
     void DisablePainting()
@@ -232,6 +247,15 @@ public class GameController : MonoBehaviour
         paintingStuff.SetActive(false);
         player.transform.GetChild(0).gameObject.SetActive(true);
         EnablePlayerStuff();
+        painting.transform.localPosition = paintingFlushPos;
+        painting.transform.eulerAngles = new Vector3(12.341f, painting.transform.eulerAngles.y - 1.32999f, 89.51601f);
+        painting.gameObject.SetActive(true);
+
+        if(inPaintRange)
+        {
+            canPaint = true;
+            EToAccess.SetActive(true);
+        }    
     }
 
     public async void UploadPainting()
@@ -259,6 +283,8 @@ public class GameController : MonoBehaviour
         CloudFile file = root.GetFileReference("painting" + paintingsCounter.count + ".png");
         await file.UploadFromFileAsync(Application.persistentDataPath + "painting.png");
         await UpdateCounterEntity(counterTable, paintingsCounter);
+
+        Debug.Log("Painting Uploaded!");
     }
 
     public void EncondeSpritePNG(Sprite sprite)
