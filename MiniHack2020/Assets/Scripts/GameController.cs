@@ -9,6 +9,7 @@ using UnityEditor.UIElements;
 using UnityStandardAssets.Characters.FirstPerson;
 using System.IO;
 using Microsoft.WindowsAzure.Storage.File;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class GameController : MonoBehaviour
     public bool canPaint;
     public bool inPaintRange;
 
+    public List<GameObject> paintingFrames;
+    List<int> paintingsPicked = new List<int>();
+
     private void Awake()
     {
         if (player == null)
@@ -44,6 +48,7 @@ public class GameController : MonoBehaviour
 
         StorageAccount = CloudStorageAccount.Parse(connectionString);
         SpawnMessages();
+        SetPaintings();
     }
 
     private void Start()
@@ -292,6 +297,73 @@ public class GameController : MonoBehaviour
         Texture2D texture = sprite.texture;
         byte[] textureBytes = texture.EncodeToPNG();
         File.WriteAllBytes(Application.persistentDataPath + "painting.png", textureBytes);
+    }
+
+    public async void SetPaintings()
+    {
+        paintingsPicked.Clear();
+
+        // Create a file client for interacting with the file service.
+        CloudFileClient fileClient = StorageAccount.CreateCloudFileClient();
+
+        // Create a share for organizing files and directories within the storage account.
+        CloudFileShare share = fileClient.GetShareReference(paintingsShare);
+
+        // Get a reference to the root directory of the share.        
+        CloudFileDirectory root = share.GetRootDirectoryReference();
+
+        CounterEntity paintingsCounter = await GetCounterEntity(counterTable, "PaintingsCounter", "PaintingsCounter");
+        int paintingCount = int.Parse(paintingsCounter.count);
+
+        for (int i = 0; i < paintingFrames.Count; i++)
+        {
+            Debug.Log(paintingCount);
+            int k = Random.Range(1, paintingCount);
+            while (paintingsPicked.Contains(k) && paintingsPicked.Count < paintingCount)
+                Random.Range(1, int.Parse(paintingsCounter.count));
+            paintingsPicked.Add(k);
+
+            // Get image file
+            CloudFile file = root.GetFileReference("Painting" + k + ".png");
+
+            if (await file.ExistsAsync())
+            {
+                byte[] byteArr = new byte[file.StreamWriteSizeInBytes];
+                await file.DownloadToByteArrayAsync(byteArr, 0);
+                Texture2D tex2d = new Texture2D(2, 2);           // Create new "empty" texture
+                if (tex2d.LoadImage(byteArr))         // Load the imagedata into the texture (size is set automatically)
+                {
+                    tex2d = rotateTexture(tex2d, false);
+                    int frame = Random.Range(0, paintingFrames.Count);
+                    paintingFrames[frame].GetComponent<Renderer>().material.mainTexture = tex2d;
+                }
+            }
+        }
+    }
+
+    Texture2D rotateTexture(Texture2D originalTexture, bool clockwise)
+    {
+        Color32[] original = originalTexture.GetPixels32();
+        Color32[] rotated = new Color32[original.Length];
+        int w = originalTexture.width;
+        int h = originalTexture.height;
+
+        int iRotated, iOriginal;
+
+        for (int j = 0; j < h; ++j)
+        {
+            for (int i = 0; i < w; ++i)
+            {
+                iRotated = (i + 1) * h - j - 1;
+                iOriginal = clockwise ? original.Length - 1 - (j * w + i) : j * w + i;
+                rotated[iRotated] = original[iOriginal];
+            }
+        }
+
+        Texture2D rotatedTexture = new Texture2D(h, w);
+        rotatedTexture.SetPixels32(rotated);
+        rotatedTexture.Apply();
+        return rotatedTexture;
     }
 }
 public class MessageEntity : TableEntity
