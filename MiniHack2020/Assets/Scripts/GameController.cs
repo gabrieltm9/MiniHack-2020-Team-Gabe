@@ -317,10 +317,9 @@ public class GameController : MonoBehaviour
 
         for (int i = 0; i < paintingFrames.Count; i++)
         {
-            Debug.Log(paintingCount);
-            int k = Random.Range(1, paintingCount);
+            int k = Random.Range(1, paintingCount + 1);
             while (paintingsPicked.Contains(k) && paintingsPicked.Count < paintingCount)
-                Random.Range(1, int.Parse(paintingsCounter.count));
+                k = Random.Range(1, paintingCount + 1);
             paintingsPicked.Add(k);
 
             // Get image file
@@ -334,8 +333,7 @@ public class GameController : MonoBehaviour
                 if (tex2d.LoadImage(byteArr))         // Load the imagedata into the texture (size is set automatically)
                 {
                     tex2d = rotateTexture(tex2d, false);
-                    int frame = Random.Range(0, paintingFrames.Count);
-                    paintingFrames[frame].GetComponent<Renderer>().material.mainTexture = tex2d;
+                    paintingFrames[i].GetComponent<Renderer>().material.mainTexture = tex2d;
                 }
             }
         }
