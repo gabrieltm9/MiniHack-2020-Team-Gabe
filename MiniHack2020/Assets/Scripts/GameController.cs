@@ -222,6 +222,7 @@ public class GameController : MonoBehaviour
     {
         paintingUI.SetActive(true);
         paintingStuff.SetActive(true);
+        player.transform.GetChild(0).gameObject.SetActive(false);
         DisablePlayerStuff();
     }
 
@@ -229,6 +230,7 @@ public class GameController : MonoBehaviour
     {
         paintingUI.SetActive(false);
         paintingStuff.SetActive(false);
+        player.transform.GetChild(0).gameObject.SetActive(true);
         EnablePlayerStuff();
     }
 
