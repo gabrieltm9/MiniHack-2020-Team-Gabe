@@ -51046,69 +51046,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 438394114}
   m_Mesh: {fileID: 1503754223}
-<<<<<<< Updated upstream
-=======
---- !u!1 &441706971
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 441706973}
-  - component: {fileID: 441706972}
-  m_Layer: 0
-  m_Name: GameController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &441706972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441706971}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ff1614ead0e1124a93b21b060ec621e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 1772674826}
-  connectionString: DefaultEndpointsProtocol=https;AccountName=tritonal;AccountKey=YQVpz7Gxy48K4wVxDtI2jX1kmhUot/J6wH3IKXEWNpNy/Th8JBdpefQ46SQytZRx4eIPyL05HJ0Da6egTfMXJA==;EndpointSuffix=core.windows.net
-  messagesTable: Minihack2020Messages
-  counterTable: Minihack2020Counter
-  paintingsShare: minihacks2020paintings
-  messagPrefab: {fileID: 4681542623119910397, guid: 3da0b0b3a88a2334bba39d14f45fecc6,
-    type: 3}
-  messagesParent: {fileID: 1479437713}
-  messageUI: {fileID: 493328798}
-  painting: {fileID: 1136792636}
-  paintingUI: {fileID: 1474430422}
-  paintingStuff: {fileID: 1169159419}
-  paintingFlushPos: {x: 0, y: 0, z: 0}
-  paintingDrawingPos: {x: 0, y: 0, z: 0}
-  EToAccess: {fileID: 0}
-  canPaint: 0
-  inPaintRange: 0
---- !u!4 &441706973
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441706971}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 21.867064, y: 5.3158064, z: -11.46084}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 32
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
->>>>>>> Stashed changes
 --- !u!1001 &447219740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54296,10 +54233,6 @@ PrefabInstance:
     - target: {fileID: 172082, guid: 074728566132335428608c1b7e7f1f14, type: 3}
       propertyPath: m_Name
       value: Painting (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 184180, guid: 074728566132335428608c1b7e7f1f14, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 482970, guid: 074728566132335428608c1b7e7f1f14, type: 3}
       propertyPath: m_LocalPosition.x
@@ -61367,7 +61300,6 @@ MeshCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-<<<<<<< Updated upstream
   m_GameObject: {fileID: 1444536748}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
@@ -61396,19 +61328,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300002, guid: 821d897858fdee444811c1ee3d5ba830, type: 3}
-=======
-  m_GameObject: {fileID: 1449831906}
-  m_LocalRotation: {x: -0, y: 0.06108633, z: -0, w: 0.9981325}
-  m_LocalPosition: {x: 469.2818, y: 5.8915505, z: 481.27722}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1169159420}
-  - {fileID: 714518147}
-  - {fileID: 529628933}
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 7.004, z: 0}
->>>>>>> Stashed changes
 --- !u!43 &1465289144
 Mesh:
   m_ObjectHideFlags: 0
