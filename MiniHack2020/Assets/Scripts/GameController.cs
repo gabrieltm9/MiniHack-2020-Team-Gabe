@@ -7,6 +7,8 @@ using Microsoft.WindowsAzure.Storage.Table;
 using TMPro;
 using UnityEditor.UIElements;
 using UnityStandardAssets.Characters.FirstPerson;
+using System.IO;
+using Microsoft.WindowsAzure.Storage.File;
 
 public class GameController : MonoBehaviour
 {
@@ -14,6 +16,8 @@ public class GameController : MonoBehaviour
 
     public string connectionString;
     public string messagesTable;
+    public string counterTable;
+    public string paintingsShare;
     public CloudStorageAccount StorageAccount;
     List<MessageEntity> tempTableResult;
 
@@ -21,6 +25,10 @@ public class GameController : MonoBehaviour
     public GameObject messagesParent;
 
     public GameObject messageUI;
+
+    public SpriteRenderer painting;
+    public GameObject paintingUI;
+    public GameObject paintingStuff;
 
     private void Awake()
     {
@@ -43,19 +51,33 @@ public class GameController : MonoBehaviour
             EnableMessageUI();
         if (Input.GetKeyDown(KeyCode.Escape) && messageUI.activeSelf)
             DisableMessageUI();
+        if (Input.GetKeyDown(KeyCode.P))
+            EnablePainting();
+        if (Input.GetKeyDown(KeyCode.Escape) && paintingUI.activeSelf)
+            DisablePainting();
     }
 
     void EnableMessageUI()
     {
         messageUI.SetActive(true);
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-        player.GetComponent<FirstPersonController>().enabled = false;
+        DisablePlayerStuff();
     }
 
     void DisableMessageUI()
     {
         messageUI.SetActive(false);
+        EnablePlayerStuff();
+    }
+
+    void DisablePlayerStuff()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        player.GetComponent<FirstPersonController>().enabled = false;
+    }
+
+    void EnablePlayerStuff()
+    {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         player.GetComponent<FirstPersonController>().enabled = true;
@@ -121,6 +143,22 @@ public class GameController : MonoBehaviour
         return insertedEntity;
     }
 
+    private async Task<CounterEntity> UpdateCounterEntity(string tableName, CounterEntity entity)
+    {
+        CloudTableClient tableClient = StorageAccount.CreateCloudTableClient();
+
+        // Create a table client for interacting with the table service 
+        CloudTable table = tableClient.GetTableReference(tableName);
+
+        // Create the InsertOrReplace  TableOperation
+        TableOperation insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
+
+        // Execute the operation.
+        TableResult result = await table.ExecuteAsync(insertOrMergeOperation);
+        CounterEntity insertedEntity = result.Result as CounterEntity;
+        return insertedEntity;
+    }
+
     public async Task<MessageEntity> GetEntityFromTable(string tableName, string partitionKey, string rowKey)
     {
         TableOperation retrieveOperation = TableOperation.Retrieve<MessageEntity>(partitionKey, rowKey);
@@ -130,6 +168,17 @@ public class GameController : MonoBehaviour
         TableResult result = await table.ExecuteAsync(retrieveOperation);
         MessageEntity messageEntity = result.Result as MessageEntity;
         return messageEntity;
+    }
+
+    public async Task<CounterEntity> GetCounterEntity(string tableName, string partitionKey, string rowKey)
+    {
+        TableOperation retrieveOperation = TableOperation.Retrieve<CounterEntity>(partitionKey, rowKey);
+        CloudTableClient tableClient = StorageAccount.CreateCloudTableClient();
+        CloudTable table = tableClient.GetTableReference(tableName);
+
+        TableResult result = await table.ExecuteAsync(retrieveOperation);
+        CounterEntity counterEntity = result.Result as CounterEntity;
+        return counterEntity;
     }
 
     public async Task PartitionScanAsync(string tableName)
@@ -162,6 +211,62 @@ public class GameController : MonoBehaviour
             throw;
         }
     }
+
+    public void SavePainting()
+    {
+        EncondeSpritePNG(painting.sprite);
+        UploadPainting();
+    }
+
+    void EnablePainting()
+    {
+        paintingUI.SetActive(true);
+        paintingStuff.SetActive(true);
+        player.transform.GetChild(0).gameObject.SetActive(false);
+        DisablePlayerStuff();
+    }
+
+    void DisablePainting()
+    {
+        paintingUI.SetActive(false);
+        paintingStuff.SetActive(false);
+        player.transform.GetChild(0).gameObject.SetActive(true);
+        EnablePlayerStuff();
+    }
+
+    public async void UploadPainting()
+    {     
+        // Create a file client for interacting with the file service.
+        CloudFileClient fileClient = StorageAccount.CreateCloudFileClient();
+
+        // Create a share for organizing files and directories within the storage account.
+        CloudFileShare share = fileClient.GetShareReference(paintingsShare);
+
+        try
+        {
+            await share.CreateIfNotExistsAsync();
+        }
+        catch (StorageException)
+        {
+            throw;
+        }
+
+        CloudFileDirectory root = share.GetRootDirectoryReference();
+
+        CounterEntity paintingsCounter = await GetCounterEntity(counterTable, "PaintingsCounter", "PaintingsCounter");
+        paintingsCounter.count = "" + (int.Parse(paintingsCounter.count) + 1);
+
+        CloudFile file = root.GetFileReference("painting" + paintingsCounter.count + ".png");
+        await file.UploadFromFileAsync(Application.persistentDataPath + "painting.png");
+        await UpdateCounterEntity(counterTable, paintingsCounter);
+    }
+
+    public void EncondeSpritePNG(Sprite sprite)
+    {
+        Texture2D texture = sprite.texture;
+        byte[] textureBytes = texture.EncodeToPNG();
+        File.WriteAllBytes(Application.persistentDataPath + "painting.png", textureBytes);
+    }
 }
 public class MessageEntity : TableEntity
 {
@@ -172,4 +277,11 @@ public class MessageEntity : TableEntity
         this.PartitionKey = message;
         this.RowKey = pos.x + " " + pos.y + " " + pos.z;
     }
+}
+
+public class CounterEntity : TableEntity
+{
+    public string count { get; set; }
+
+    public CounterEntity() { }
 }
