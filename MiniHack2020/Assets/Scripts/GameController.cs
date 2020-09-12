@@ -24,7 +24,7 @@ public class GameController : MonoBehaviour
 
     public GameObject messagPrefab;
     public GameObject messagesParent;
-
+    public List<MessageEntity> messagesSpawned = new List<MessageEntity>();
     public GameObject messageUI;
 
     public SpriteRenderer painting;
@@ -41,6 +41,8 @@ public class GameController : MonoBehaviour
     public List<GameObject> paintingFrames;
     List<int> paintingsPicked = new List<int>();
 
+    public GameObject blackScreenCanvasGroup;
+
     private void Awake()
     {
         if (player == null)
@@ -48,11 +50,13 @@ public class GameController : MonoBehaviour
 
         StorageAccount = CloudStorageAccount.Parse(connectionString);
         SpawnMessages();
+        StartCoroutine(UpdateMessagesTimer());
         SetPaintings();
     }
 
     private void Start()
     {
+        StartCoroutine(WaitToFadeIn(blackScreenCanvasGroup, 0, 0.2f));
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -103,7 +107,10 @@ public class GameController : MonoBehaviour
         await PartitionScanAsync(messagesTable); //Pulls entire messages table into tempTableResult list
 
         foreach (MessageEntity messageEntity in tempTableResult)
-            InstantiateMessage(messageEntity);
+        {
+            if(!messagesSpawned.Contains(messageEntity))
+                InstantiateMessage(messageEntity);
+        }
     }
 
     void InstantiateMessage(MessageEntity messageEntity)
@@ -117,6 +124,15 @@ public class GameController : MonoBehaviour
         GameObject newMessage = Instantiate(messagPrefab, pos, transform.rotation, messagesParent.transform);
         newMessage.transform.GetChild(0).GetComponent<TMP_Text>().text = messageEntity.PartitionKey;
         newMessage.GetComponent<MessageController>().player = player;
+
+        messagesSpawned.Add(messageEntity);
+    }
+
+    IEnumerator UpdateMessagesTimer()
+    {
+        yield return new WaitForSeconds(5);
+        SpawnMessages();
+        StartCoroutine(UpdateMessagesTimer());
     }
 
     public void AddMessageButton(TMP_InputField messageInput)
@@ -261,6 +277,25 @@ public class GameController : MonoBehaviour
             canPaint = true;
             EToAccess.SetActive(true);
         }    
+    }
+
+    IEnumerator WaitToFadeIn(GameObject obj, float target, float speed)
+    {
+        yield return new WaitForSeconds(1);
+        StartCoroutine(FadeObjectCanvasGroup(obj, target, speed));
+    }
+
+    IEnumerator FadeObjectCanvasGroup(GameObject obj, float target, float speed)
+    {
+        if (target > 0 && !obj.activeSelf)
+            obj.SetActive(true);
+        while(Mathf.Abs(obj.GetComponent<CanvasGroup>().alpha - target) > 0.01f)
+        {
+            obj.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(obj.GetComponent<CanvasGroup>().alpha, target, speed * Time.deltaTime);
+            yield return new WaitForSeconds(0);
+        }
+        if (target == 0 && obj.activeSelf)
+            obj.SetActive(false);
     }
 
     public async void UploadPainting()
