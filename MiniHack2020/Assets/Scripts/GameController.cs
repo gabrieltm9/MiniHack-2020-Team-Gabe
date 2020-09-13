@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using TMPro;
-using UnityEditor.UIElements;
 using UnityStandardAssets.Characters.FirstPerson;
 using System.IO;
 using Microsoft.WindowsAzure.Storage.File;
-using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -42,6 +40,8 @@ public class GameController : MonoBehaviour
     List<int> paintingsPicked = new List<int>();
 
     public GameObject blackScreenCanvasGroup;
+    public GameObject welcomeToCanvasGroup;
+    public GameObject theOasisCanvasGroup;
 
     private void Awake()
     {
@@ -56,7 +56,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(WaitToFadeIn(blackScreenCanvasGroup, 0, 0.2f));
+        StartCoroutine(FadeIn());
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -279,10 +279,19 @@ public class GameController : MonoBehaviour
         }    
     }
 
-    IEnumerator WaitToFadeIn(GameObject obj, float target, float speed)
+    IEnumerator FadeIn()
     {
-        yield return new WaitForSeconds(1);
-        StartCoroutine(FadeObjectCanvasGroup(obj, target, speed));
+        blackScreenCanvasGroup.SetActive(true);
+        yield return new WaitForSeconds(3.3f);
+        StartCoroutine(FadeObjectCanvasGroup(welcomeToCanvasGroup, 1, 0.46f));
+        yield return new WaitForSeconds(3.2f);
+        StartCoroutine(FadeObjectCanvasGroup(theOasisCanvasGroup, 1, 0.46f));
+        yield return new WaitForSeconds(5.2f);
+        StartCoroutine(FadeObjectCanvasGroup(blackScreenCanvasGroup, 0, 0.25f));
+        yield return new WaitForSeconds(4.6f);
+        StartCoroutine(FadeObjectCanvasGroup(welcomeToCanvasGroup, 0, 0.7f));
+        yield return new WaitForSeconds(2.8f);
+        StartCoroutine(FadeObjectCanvasGroup(theOasisCanvasGroup, 0, 0.7f));
     }
 
     IEnumerator FadeObjectCanvasGroup(GameObject obj, float target, float speed)
