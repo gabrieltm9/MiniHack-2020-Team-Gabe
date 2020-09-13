@@ -8,6 +8,7 @@ using TMPro;
 using UnityStandardAssets.Characters.FirstPerson;
 using System.IO;
 using Microsoft.WindowsAzure.Storage.File;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -43,6 +44,12 @@ public class GameController : MonoBehaviour
     public GameObject welcomeToCanvasGroup;
     public GameObject theOasisCanvasGroup;
 
+    public AudioSource music;
+    public List<AudioSource> sfx;
+    public Slider musicSlider;
+    public Slider sfxSlider;
+    public GameObject quitMenu;
+
     private void Awake()
     {
         if (player == null)
@@ -69,7 +76,9 @@ public class GameController : MonoBehaviour
             DisableMessageUI();
         if (Input.GetKeyDown(KeyCode.Escape) && paintingUI.activeSelf)
             DisablePainting();
-        if(Input.GetKeyDown(KeyCode.E) && canPaint)
+        if (Input.GetKeyDown(KeyCode.Escape) && !paintingUI.activeSelf && !messageUI.activeSelf)
+            ToggleQuitMenu();
+        if (Input.GetKeyDown(KeyCode.E) && canPaint)
         {
             canPaint = false;
             EnablePainting();
@@ -112,6 +121,33 @@ public class GameController : MonoBehaviour
                 InstantiateMessage(messageEntity);
         }
     }
+
+    public void ToggleQuitMenu()
+    {
+        quitMenu.SetActive(!quitMenu.activeSelf);
+        if (quitMenu.activeSelf)
+            DisablePlayerStuff();
+        else
+            EnablePlayerStuff();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    public void UpdateSFXVolume()
+    {
+        foreach(AudioSource sfxSource in sfx)
+        {
+            sfxSource.volume = sfxSlider.value;
+        }
+    }
+
+    public void UpdateMusicVolume()
+    {
+        music.volume = musicSlider.value;
+    }    
 
     void InstantiateMessage(MessageEntity messageEntity)
     {
